@@ -46,10 +46,10 @@ Menu::eMenu Menu::runMainMenu() {
 
 Menu::eTask Menu::runTaskListMenu( const char *menuName ) {
     constexpr char menuText[] = "1. Task 1.2\n"
-                                "2. Task 1.2\n"
-                                "3. Task 1.2\n"
-                                "4. Task 1.2\n"
-                                "5. Task 1.2\n"
+                                "2. Task 1.3\n"
+                                "3. Task 2.1\n"
+                                "4. Task 2.2\n"
+                                "5. Task 2.3\n"
                                 "0. Exit";
     return eTask( runMenu( menuName,
                            menuText,
