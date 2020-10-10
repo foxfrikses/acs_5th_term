@@ -7,7 +7,7 @@
 
 #include "iqueue.h"
 
-class DynamicQueue : protected std::deque<uint8_t>, IQueue
+class DynamicQueue : public IQueue, protected std::deque<uint8_t>
 {
 protected:
     std::mutex _m;

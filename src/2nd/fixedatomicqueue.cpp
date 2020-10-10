@@ -10,7 +10,7 @@ void FixedAtomicQueue::push(uint8_t val)
 
 }
 
-FixedAtomicQueue::FixedAtomicQueue(){
+FixedAtomicQueue::FixedAtomicQueue(uint32_t size){
 
 }
 

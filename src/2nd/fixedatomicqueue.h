@@ -3,13 +3,13 @@
 
 #include <iqueue.h>
 
-class FixedAtomicQueue : IQueue
+class FixedAtomicQueue : public IQueue
 {
 public:
     virtual bool pop(uint8_t &val) override;
     virtual void push(uint8_t val) override;
 
-    FixedAtomicQueue();
+    FixedAtomicQueue(uint32_t);
     virtual ~FixedAtomicQueue() override;
 };
 

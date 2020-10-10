@@ -7,7 +7,7 @@
 
 #include "iqueue.h"
 
-class FixedMutexQueue : IQueue
+class FixedMutexQueue : public IQueue
 {
 protected:
     std::mutex _m;
@@ -21,7 +21,7 @@ public:
     virtual void push(uint8_t val) override;
     virtual bool pop(uint8_t& val) override;
 
-    FixedMutexQueue(uint size);
+    FixedMutexQueue(uint32_t size);
     virtual ~FixedMutexQueue() override;
 };
 

@@ -22,7 +22,7 @@ public:
     ~QueueTask();
 
 protected:
-    void consumerFunc();
+    void consumerFunc( uint64_t &result );
     void producerFunc();
 
     uint32_t QueueSize{0};

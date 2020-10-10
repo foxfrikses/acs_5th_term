@@ -1,7 +1,7 @@
 #include "fixedmutexqueue.h"
 #include <thread>
 
-FixedMutexQueue::FixedMutexQueue(uint size)
+FixedMutexQueue::FixedMutexQueue(uint32_t size)
 {
     this->size = size + 1u;
     array = new uint8_t[this->size];
