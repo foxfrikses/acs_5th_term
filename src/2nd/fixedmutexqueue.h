@@ -5,7 +5,9 @@
 #include <mutex>
 #include <condition_variable>
 
-class FixedMutexQueue
+#include "iqueue.h"
+
+class FixedMutexQueue : IQueue
 {
 protected:
     std::mutex _m;
@@ -16,11 +18,11 @@ protected:
     uint push_i = 0;
 
 public:
-    void push(uint8_t val);
-    bool pop(uint8_t& val);
+    virtual void push(uint8_t val) override;
+    virtual bool pop(uint8_t& val) override;
 
     FixedMutexQueue(uint size);
-    ~FixedMutexQueue();
+    virtual ~FixedMutexQueue() override;
 };
 
 #endif // FIXEDMUTEXQUEUE_H

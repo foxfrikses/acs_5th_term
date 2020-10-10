@@ -11,6 +11,7 @@ SOURCES += \
         fixedmutexqueue.cpp \
         main.cpp \
         menu.cpp \
+        queuetask.cpp \
         tasks.cpp
 
 HEADERS += \
@@ -18,5 +19,7 @@ HEADERS += \
     dynamicqueue.h \
     fixedatomicqueue.h \
     fixedmutexqueue.h \
+    iqueue.h \
     menu.h \
+    queuetask.h \
     tasks.h

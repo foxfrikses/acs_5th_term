@@ -5,14 +5,16 @@
 #include <inttypes.h>
 #include <mutex>
 
-class DynamicQueue : protected std::deque<uint8_t>
+#include "iqueue.h"
+
+class DynamicQueue : protected std::deque<uint8_t>, IQueue
 {
 protected:
     std::mutex _m;
 
 public:
-    void push(uint8_t val);
-    bool pop(uint8_t& val);
+    virtual void push(uint8_t val) override;
+    virtual bool pop(uint8_t& val) override;
 
     DynamicQueue();
 };

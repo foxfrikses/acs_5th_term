@@ -1,12 +1,16 @@
 #ifndef FIXEDATOMICQUEUE_H
 #define FIXEDATOMICQUEUE_H
 
-#include <QtCore/qglobal.h>
+#include <iqueue.h>
 
-class fixedatomicqueue
+class FixedAtomicQueue : IQueue
 {
 public:
-    fixedatomicqueue();
+    virtual bool pop(uint8_t &val) override;
+    virtual void push(uint8_t val) override;
+
+    FixedAtomicQueue();
+    virtual ~FixedAtomicQueue() override;
 };
 
 #endif // FIXEDATOMICQUEUE_H
