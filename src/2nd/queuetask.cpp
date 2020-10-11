@@ -77,12 +77,13 @@ QueueTask::QueueTask()
 QueueTask::~QueueTask()
 {}
 
-void QueueTask::consumerFunc( uint64_t &result )
+void QueueTask::consumerFunc( uint32_t &result )
 {
     uint32_t localResult{0};
     uint8_t iterarionResult;
     while( queue->pop(iterarionResult) )
         localResult += iterarionResult;
+    result = localResult;
 }
 
 void QueueTask::producerFunc()

@@ -1,5 +1,6 @@
 #include "tasks.h"
 #include "arraytask.h"
+#include "queuetask.h"
 #include <fstream>
 #include <iostream>
 
@@ -80,21 +81,97 @@ void task_1_3(){
 }
 
 void task_2_1(){
-    std::string result = "21";
+    std::string result;
+    uint32_t TaskNum = 4*1024*1024;
+    uint32_t ProducerNum[]{1, 2, 4};
+    uint32_t ConsumerNum[]{1, 2, 4};
+    QueueTask queTsk;
+    result  = "Dynamic queue";
+    result += "\nTaskNum = " + std::to_string(TaskNum);
+    result += "\nProducerNum = {1, 2, 4}";
+    result += "\nConsumerNum = {1, 2, 4}\n\n";
+    for( auto i = 0u; i < 3; ++i ) {
+        for( auto j = 0u; j < 3; ++j ){
+            result += std::to_string(ProducerNum[i]) + " producers\n";
+            result += std::to_string(ConsumerNum[j]) + " consumers\n";
+
+            queTsk.setTaskNum(TaskNum);
+            queTsk.setProducerNum(ProducerNum[i]);
+            queTsk.setConsumerNum(ConsumerNum[j]);
+            if( queTsk.run(QueueTask::task::dynamic) )
+                result += "\n\tEverything is OK\n\n";
+            else
+                result += "\n\tThere is an error\n\n";
+        }
+    }
 
     saveResult( result, "output_2_1.txt" );
     showResult( "output_2_1.txt" );
 }
 
 void task_2_2(){
-    std::string result = "22";
+    std::string result;
+    uint32_t TaskNum = 4*1024*1024;
+    uint32_t ProducerNum[]{1, 2, 4};
+    uint32_t ConsumerNum[]{1, 2, 4};
+    uint32_t QueueSize[]{1, 4, 16};
+    QueueTask queTsk;
+    result  = "Fixed size mutex queue";
+    result += "\nTaskNum = " + std::to_string(TaskNum);
+    result += "\nProducerNum = {1, 2, 4}";
+    result += "\nConsumerNum = {1, 2, 4}\n\n";
+    for( auto i = 0u; i < 3; ++i ) {
+        for( auto j = 0u; j < 3; ++j ){
+            for( auto k = 0u; k < 3; ++k ){
+                result += std::to_string(ProducerNum[i]) + " producers\n";
+                result += std::to_string(ConsumerNum[j]) + " consumers\n";
+                result += std::to_string(QueueSize  [k]) + " elements in array\n";
+
+
+                queTsk.setTaskNum(TaskNum);
+                queTsk.setProducerNum(ProducerNum[i]);
+                queTsk.setConsumerNum(ConsumerNum[j]);
+                if( queTsk.run(QueueTask::task::fixed_mutex, QueueSize[k]) )
+                    result += "\n\tEverything is OK\n\n";
+                else
+                 result += "\n\tThere is an error\n\n";
+            }
+        }
+    }
 
     saveResult( result, "output_2_2.txt" );
     showResult( "output_2_2.txt" );
 }
 
 void task_2_3(){
-    std::string result = "23";
+    std::string result;
+    uint32_t TaskNum = 4*1024*1024;
+    uint32_t ProducerNum[]{1, 2, 4};
+    uint32_t ConsumerNum[]{1, 2, 4};
+    uint32_t QueueSize[]{1, 4, 16};
+    QueueTask queTsk;
+    result  = "Fixed size atomic queue";
+    result += "\nTaskNum = " + std::to_string(TaskNum);
+    result += "\nProducerNum = {1, 2, 4}";
+    result += "\nConsumerNum = {1, 2, 4}\n\n";
+    for( auto i = 0u; i < 3; ++i ) {
+        for( auto j = 0u; j < 3; ++j ){
+            for( auto k = 0u; k < 3; ++k ){
+                result += std::to_string(ProducerNum[i]) + " producers\n";
+                result += std::to_string(ConsumerNum[j]) + " consumers\n";
+                result += std::to_string(QueueSize  [k]) + " elements in array\n";
+
+
+                queTsk.setTaskNum(TaskNum);
+                queTsk.setProducerNum(ProducerNum[i]);
+                queTsk.setConsumerNum(ConsumerNum[j]);
+                if( queTsk.run(QueueTask::task::fixed_atomic, QueueSize[k]) )
+                    result += "\n\tEverything is OK\n\n";
+                else
+                 result += "\n\tThere is an error\n\n";
+            }
+        }
+    }
 
     saveResult( result, "output_2_3.txt" );
     showResult( "output_2_3.txt" );

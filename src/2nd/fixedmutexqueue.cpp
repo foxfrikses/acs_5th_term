@@ -10,11 +10,11 @@ FixedMutexQueue::FixedMutexQueue(uint32_t size)
 void FixedMutexQueue::push(uint8_t val)
 {
     std::unique_lock lck(_m);
-    if ( pop_i == (push_i + 1u)%size )
+    while( pop_i == (push_i + 1u)%size )
         not_filled_cond.wait( lck );
 
     array[push_i] = val;
-    ++push_i;
+    push_i = (push_i + 1u)%size;
 }
 
 bool FixedMutexQueue::pop(uint8_t& val)
@@ -28,9 +28,9 @@ bool FixedMutexQueue::pop(uint8_t& val)
             return false;
     }
     val = array[pop_i];
-    pop_i = (pop_i + size - 1)%size;
-    lck.unlock();
+    pop_i = (pop_i + 1u)%size;
     not_filled_cond.notify_one();
+    lck.unlock();
     return true;
 }
 
