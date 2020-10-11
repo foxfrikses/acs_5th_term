@@ -10,12 +10,17 @@
 class FixedMutexQueue : public IQueue
 {
 protected:
+    uint32_t _maxSize;
+    uint32_t _curSize;
+    uint32_t _popInd;
+
     std::mutex _m;
-    std::condition_variable not_filled_cond;
-    uint8_t *array;
-    uint size;
-    uint pop_i = 0;
-    uint push_i = 0;
+    std::condition_variable _not_full_cond;
+    std::condition_variable _not_empty_cond;
+
+    uint8_t *_array;
+    bool     _empty{true};
+    bool     _full {false};
 
 public:
     virtual void push(uint8_t val) override;

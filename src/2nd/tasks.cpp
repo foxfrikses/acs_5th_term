@@ -82,24 +82,36 @@ void task_1_3(){
 
 void task_2_1(){
     std::string result;
+    const uint prNumCnt{3u};
+    const uint coNumCnt{3u};
     uint32_t TaskNum = 4*1024*1024;
-    uint32_t ProducerNum[]{1, 2, 4};
-    uint32_t ConsumerNum[]{1, 2, 4};
+    uint32_t ProducerNum[prNumCnt]{1, 2, 4 };
+    uint32_t ConsumerNum[coNumCnt]{1, 2, 4 };
     QueueTask queTsk;
-    result  = "Dynamic queue";
+    result  = "Dynamic size mutex queue";
     result += "\nTaskNum = " + std::to_string(TaskNum);
     result += "\nProducerNum = {1, 2, 4}";
     result += "\nConsumerNum = {1, 2, 4}\n\n";
-    for( auto i = 0u; i < 3; ++i ) {
-        for( auto j = 0u; j < 3; ++j ){
-            result += std::to_string(ProducerNum[i]) + " producers\n";
-            result += std::to_string(ConsumerNum[j]) + " consumers\n";
-
+    for( auto pr = 0u; pr < prNumCnt; ++pr ) {
+        for( auto co = 0u; co < coNumCnt; ++co ){
+            result += std::to_string(ProducerNum[pr]) + " producers\n";
+            result += std::to_string(ConsumerNum[co]) + " consumers\n";
             queTsk.setTaskNum(TaskNum);
-            queTsk.setProducerNum(ProducerNum[i]);
-            queTsk.setConsumerNum(ConsumerNum[j]);
-            if( queTsk.run(QueueTask::task::dynamic) )
-                result += "\n\tEverything is OK\n\n";
+            queTsk.setProducerNum(ProducerNum[pr]);
+            queTsk.setConsumerNum(ConsumerNum[co]);
+            if( queTsk.run(QueueTask::task::dynamic) ) {
+                result += "\n\tEverything is OK";
+                for( auto i = 0u; i < ProducerNum[pr]; ++i )
+                    result += "\n\t\tProd " + std::to_string(i) + ": " +
+                              std::to_string(queTsk.getDurations().produsers[i]) +
+                              " ms";
+                result += "\n";
+                for( auto i = 0u; i < ConsumerNum[co]; ++i )
+                    result += "\n\t\tConsum " + std::to_string(i) + ": " +
+                              std::to_string(queTsk.getDurations().consumers[i]) +
+                              " ms";
+                result += "\n\n";
+            }
             else
                 result += "\n\tThere is an error\n\n";
         }
@@ -111,28 +123,40 @@ void task_2_1(){
 
 void task_2_2(){
     std::string result;
+    const uint prNumCnt{3u};
+    const uint coNumCnt{3u};
+    const uint quSizCnt{3u};
     uint32_t TaskNum = 4*1024*1024;
-    uint32_t ProducerNum[]{1, 2, 4};
-    uint32_t ConsumerNum[]{1, 2, 4};
-    uint32_t QueueSize[]{1, 4, 16};
+    uint32_t ProducerNum[prNumCnt]{1, 2, 4 };
+    uint32_t ConsumerNum[coNumCnt]{1, 2, 4 };
+    uint32_t QueueSize  [quSizCnt]{1, 4, 16};
     QueueTask queTsk;
     result  = "Fixed size mutex queue";
     result += "\nTaskNum = " + std::to_string(TaskNum);
     result += "\nProducerNum = {1, 2, 4}";
     result += "\nConsumerNum = {1, 2, 4}\n\n";
-    for( auto i = 0u; i < 3; ++i ) {
-        for( auto j = 0u; j < 3; ++j ){
-            for( auto k = 0u; k < 3; ++k ){
-                result += std::to_string(ProducerNum[i]) + " producers\n";
-                result += std::to_string(ConsumerNum[j]) + " consumers\n";
+    for( auto pr = 0u; pr < prNumCnt; ++pr ) {
+        for( auto co = 0u; co < coNumCnt; ++co ){
+            for( auto k = 0u; k < quSizCnt; ++k ){
+                result += std::to_string(ProducerNum[pr]) + " producers\n";
+                result += std::to_string(ConsumerNum[co]) + " consumers\n";
                 result += std::to_string(QueueSize  [k]) + " elements in array\n";
-
-
                 queTsk.setTaskNum(TaskNum);
-                queTsk.setProducerNum(ProducerNum[i]);
-                queTsk.setConsumerNum(ConsumerNum[j]);
-                if( queTsk.run(QueueTask::task::fixed_mutex, QueueSize[k]) )
-                    result += "\n\tEverything is OK\n\n";
+                queTsk.setProducerNum(ProducerNum[pr]);
+                queTsk.setConsumerNum(ConsumerNum[co]);
+                if( queTsk.run(QueueTask::task::fixed_mutex, QueueSize[k]) ) {
+                    result += "\n\tEverything is OK";
+                    for( auto i = 0u; i < ProducerNum[pr]; ++i )
+                        result += "\n\t\tProd " + std::to_string(i) + ": " +
+                                  std::to_string(queTsk.getDurations().produsers[i]) +
+                                  " ms";
+                    result += "\n";
+                    for( auto i = 0u; i < ConsumerNum[co]; ++i )
+                        result += "\n\t\tConsum " + std::to_string(i) + ": " +
+                                  std::to_string(queTsk.getDurations().consumers[i]) +
+                                  " ms";
+                    result += "\n\n";
+                }
                 else
                  result += "\n\tThere is an error\n\n";
             }
@@ -145,33 +169,6 @@ void task_2_2(){
 
 void task_2_3(){
     std::string result;
-    uint32_t TaskNum = 4*1024*1024;
-    uint32_t ProducerNum[]{1, 2, 4};
-    uint32_t ConsumerNum[]{1, 2, 4};
-    uint32_t QueueSize[]{1, 4, 16};
-    QueueTask queTsk;
-    result  = "Fixed size atomic queue";
-    result += "\nTaskNum = " + std::to_string(TaskNum);
-    result += "\nProducerNum = {1, 2, 4}";
-    result += "\nConsumerNum = {1, 2, 4}\n\n";
-    for( auto i = 0u; i < 3; ++i ) {
-        for( auto j = 0u; j < 3; ++j ){
-            for( auto k = 0u; k < 3; ++k ){
-                result += std::to_string(ProducerNum[i]) + " producers\n";
-                result += std::to_string(ConsumerNum[j]) + " consumers\n";
-                result += std::to_string(QueueSize  [k]) + " elements in array\n";
-
-
-                queTsk.setTaskNum(TaskNum);
-                queTsk.setProducerNum(ProducerNum[i]);
-                queTsk.setConsumerNum(ConsumerNum[j]);
-                if( queTsk.run(QueueTask::task::fixed_atomic, QueueSize[k]) )
-                    result += "\n\tEverything is OK\n\n";
-                else
-                 result += "\n\tThere is an error\n\n";
-            }
-        }
-    }
 
     saveResult( result, "output_2_3.txt" );
     showResult( "output_2_3.txt" );

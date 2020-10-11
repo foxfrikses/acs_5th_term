@@ -3,37 +3,41 @@
 
 FixedMutexQueue::FixedMutexQueue(uint32_t size)
 {
-    this->size = size + 1u;
-    array = new uint8_t[this->size];
+    _curSize = 0;
+    _maxSize = size;
+    _popInd = 0;
+    _array = new uint8_t[size];
 }
 
 void FixedMutexQueue::push(uint8_t val)
 {
     std::unique_lock lck(_m);
-    while( pop_i == (push_i + 1u)%size )
-        not_filled_cond.wait( lck );
+    _not_full_cond.wait( lck, [this]{ return !_full; } );
+    ++_curSize;
 
-    array[push_i] = val;
-    push_i = (push_i + 1u)%size;
+    _array[(_popInd + _curSize) % _maxSize] = val;
+    _full  = (_curSize == _maxSize);
+    _empty = false;
+    _not_empty_cond.notify_one();
 }
 
 bool FixedMutexQueue::pop(uint8_t& val)
 {
     std::unique_lock lck(_m);
-    if ( pop_i == push_i ){
-        lck.unlock();
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        lck.lock();
-        if ( pop_i == push_i )
-            return false;
-    }
-    val = array[pop_i];
-    pop_i = (pop_i + 1u)%size;
-    not_filled_cond.notify_one();
-    lck.unlock();
+    if( !_not_empty_cond.wait_for( lck,
+                                   std::chrono::milliseconds(10),
+                                   [this]{ return !_empty; } ) )
+        return false;
+
+    val = _array[_popInd];
+    _popInd = (_popInd + 1)%_maxSize;
+    --_curSize;
+    _full  = false;
+    _empty = !_curSize;
+    _not_full_cond.notify_one();
     return true;
 }
 
 FixedMutexQueue::~FixedMutexQueue(){
-    delete []array;
+    delete []_array;
 }
