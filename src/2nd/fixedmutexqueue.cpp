@@ -13,8 +13,8 @@ void FixedMutexQueue::push(uint8_t val)
 {
     std::unique_lock lck(_m);
     _not_full_cond.wait( lck, [this]{ return !_full; } );
-    ++_curSize;
 
+    ++_curSize;
     _array[(_popInd + _curSize) % _maxSize] = val;
     _full  = (_curSize == _maxSize);
     _empty = false;

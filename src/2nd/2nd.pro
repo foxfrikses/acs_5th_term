@@ -11,7 +11,9 @@ SOURCES += \
         fixedmutexqueue.cpp \
         main.cpp \
         menu.cpp \
+        poor_semaphore.cpp \
         queuetask.cpp \
+        semaphore.cpp \
         tasks.cpp
 
 HEADERS += \
@@ -21,5 +23,7 @@ HEADERS += \
     fixedmutexqueue.h \
     iqueue.h \
     menu.h \
+    poor_semaphore.h \
     queuetask.h \
+    semaphore.h \
     tasks.h
