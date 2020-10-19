@@ -4,89 +4,78 @@
 #include <chrono>
 
 ArrayTask::ArrayTask()
-    : _array{nullptr}
+    : _num_tasks(1),
+      _num_threads(1),
+      _array(1)
 {}
 
-ArrayTask::~ArrayTask(){
-    if( !_array )
-        delete[] _array;
+ArrayTask::~ArrayTask()
+{}
+
+void ArrayTask::set_num_tasks( uint32_t num_tasks ){
+    _num_tasks = (num_tasks) ? num_tasks : 1;
+    _array.resize(num_tasks);
 }
 
-void ArrayTask::setNumsTasksThreads( uint32_t NumTasks, uint32_t NumThreads ){
-    if( !_array )
-        delete[] _array;
-    this->NumTasks   = NumTasks;
-    this->NumThreads = NumThreads;
-    if( NumTasks != 0u && NumThreads != 0u ){
-        _array = new int[NumTasks];
-        for( auto i = 0u; i < NumTasks; ++i )
-            _array[i] = 0;
-        _index_a = 0;
-        _index_m = 0;
-    }
-    else _array = nullptr;
+void ArrayTask::set_num_threads( uint32_t num_threads ){
+    _num_threads = (num_threads) ? num_threads : 1;
 }
 
-uint64_t ArrayTask::getDuration(){
+uint64_t ArrayTask::get_duration(){
    return _duration;
 }
 
 bool ArrayTask::run( ArrayTask::task tsk ){
     using namespace std::chrono;
-
-    if ( !_array )
-        return false;
-
-    for( auto i = 0u; i < NumTasks; ++i )
-        _array[i] = 0;
-
-    void (ArrayTask::*f)(void);
     using task = ArrayTask::task;
+
+    for( auto &elem : _array )
+        elem = 0;
+
+    _index_a = 0;
+    _index_m = 0;
+
+    void (ArrayTask::*func)(void);
     switch (tsk) {
     case task::atomic:
-        f = &ArrayTask::atomicFunc;
-        _index_a.store(0u);
+        func = &ArrayTask::atomic_func;
         break;
     case task::atomic_with_sleep:
-        f = &ArrayTask::atomicSleepingFunc;
-        _index_a.store(0u);
+        func = &ArrayTask::atomic_sleeping_func;
         break;
     case task::mutex:
-        f = &ArrayTask::mutexFunc;
-        _index_m = 0;
+        func = &ArrayTask::mutex_func;
         break;
     case task::mutex_with_sleep:
-        f = &ArrayTask::mutexSleepingFunc;
-        _index_m = 0;
+        func = &ArrayTask::mutex_sleeping_func;
         break;
     }
 
-    std::thread threads[NumThreads];
+    std::thread threads[_num_threads];
+    auto start{ high_resolution_clock::now() };
 
-    auto start{high_resolution_clock::now()};
-
-    for( auto i = 0u; i < NumThreads; ++i )
-        threads[i] = std::thread(f, this);
-    for( auto i = 0u; i < NumThreads; ++i )
+    for( auto i = 0u; i < _num_threads; ++i )
+        threads[i] = std::thread( func, this );
+    for( auto i = 0u; i < _num_threads; ++i )
         threads[i].join();
 
-    auto end{high_resolution_clock::now()};
-    _duration = duration_cast<milliseconds>(end - start).count();
+    auto end{ high_resolution_clock::now() };
+    _duration = duration_cast<milliseconds>( end - start ).count();
 
-    for( auto i = 0u; i < NumTasks; ++i )
-        if ( _array[i] != 1 )
+    for( auto elem : _array )
+        if ( elem != 1 )
             return false;
 
     return true;
 }
 
-void ArrayTask::atomicFunc()
+void ArrayTask::atomic_func()
 {
     uint32_t i;
-    bool flag{true};
+    bool flag{ true };
     while( flag ) {
-        i = _index_a.fetch_add(1);
-        if( i < NumTasks ) {
+        i = _index_a.fetch_add( 1 );
+        if( i < _num_tasks ) {
             ++_array[i];
         }
         else {
@@ -95,15 +84,15 @@ void ArrayTask::atomicFunc()
     }
 }
 
-void ArrayTask::atomicSleepingFunc()
+void ArrayTask::atomic_sleeping_func()
 {
     uint32_t i;
-    bool flag{true};
+    bool flag{ true };
     while( flag ) {
-        i = _index_a.fetch_add(1);
-        if( i < NumTasks ) {
+        i = _index_a.fetch_add( 1 );
+        if( i < _num_tasks ) {
             ++_array[i];
-            std::this_thread::sleep_for(std::chrono::nanoseconds(10));
+            std::this_thread::sleep_for( std::chrono::nanoseconds(10) );
         }
         else {
             flag = false;
@@ -111,16 +100,16 @@ void ArrayTask::atomicSleepingFunc()
     }
 }
 
-void ArrayTask::mutexFunc()
+void ArrayTask::mutex_func()
 {
     uint32_t i;
-    bool flag{true};
+    bool flag{ true };
     while( flag ) {
         _m.lock();
         i = _index_m;
         ++_index_m;
         _m.unlock();
-        if( i < NumTasks ) {
+        if( i < _num_tasks ) {
             ++_array[i];
         }
         else {
@@ -129,18 +118,18 @@ void ArrayTask::mutexFunc()
     }
 }
 
-void ArrayTask::mutexSleepingFunc()
+void ArrayTask::mutex_sleeping_func()
 {
     uint32_t i;
-    bool flag{true};
+    bool flag{ true };
     while( flag ) {
         _m.lock();
         i = _index_m;
         ++_index_m;
         _m.unlock();
-        if( i < NumTasks ) {
+        if( i < _num_tasks ) {
             ++_array[i];
-            std::this_thread::sleep_for(std::chrono::nanoseconds(10));
+            std::this_thread::sleep_for( std::chrono::nanoseconds(10) );
         }
         else {
             flag = false;

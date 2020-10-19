@@ -3,7 +3,7 @@
 #include <chrono>
 
 void DynamicQueue::push(uint8_t val){
-    std::unique_lock lck(_m);
+    std::lock_guard lck(_m);
     deque::push_back(val);
 }
 
@@ -11,7 +11,7 @@ bool DynamicQueue::pop(uint8_t& val){
     std::unique_lock lck(_m);
     if( deque::empty() ) {
         lck.unlock();
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
         lck.lock();
         if ( deque::empty() )
             return false;
