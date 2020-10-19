@@ -35,10 +35,8 @@ public:
     ~ArrayTask();
 
 protected:
-    void atomic_func();
-    void atomic_sleeping_func();
-    void mutex_func();
-    void mutex_sleeping_func();
+    template<class T>
+    void _func( T& counter, bool is_mutex, bool is);
 };
 
 #endif // ARRAYTASK_H

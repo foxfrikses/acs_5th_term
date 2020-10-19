@@ -30,6 +30,7 @@ bool FixedMutexQueue::pop(uint8_t& val)
         return false;
 
     val = _array[_popInd];
+    _array[_popInd] = 0;
     _popInd = (_popInd + 1)%_maxSize;
     --_curSize;
     _full  = false;

@@ -34,28 +34,19 @@ bool ArrayTask::run( ArrayTask::task tsk ){
 
     _index_a = 0;
     _index_m = 0;
-
-    void (ArrayTask::*func)(void);
-    switch (tsk) {
-    case task::atomic:
-        func = &ArrayTask::atomic_func;
-        break;
-    case task::atomic_with_sleep:
-        func = &ArrayTask::atomic_sleeping_func;
-        break;
-    case task::mutex:
-        func = &ArrayTask::mutex_func;
-        break;
-    case task::mutex_with_sleep:
-        func = &ArrayTask::mutex_sleeping_func;
-        break;
-    }
+    bool is_mutex   = tsk == task::mutex            || tsk == task::mutex_with_sleep;
+    bool with_sleep = tsk == task::mutex_with_sleep || tsk == task::atomic_with_sleep;
 
     std::thread threads[_num_threads];
     auto start{ high_resolution_clock::now() };
 
-    for( auto i = 0u; i < _num_threads; ++i )
-        threads[i] = std::thread( func, this );
+    if( is_mutex )
+        for( auto i = 0u; i < _num_threads; ++i )
+           threads[i] = std::thread( &ArrayTask::_func<uint32_t>, this, std::ref(_index_m), is_mutex, with_sleep );
+    else
+        for( auto i = 0u; i < _num_threads; ++i )
+           threads[i] = std::thread( &ArrayTask::_func<std::atomic<uint32_t>>, this, std::ref(_index_a), is_mutex, with_sleep );
+
     for( auto i = 0u; i < _num_threads; ++i )
         threads[i].join();
 
@@ -69,70 +60,22 @@ bool ArrayTask::run( ArrayTask::task tsk ){
     return true;
 }
 
-void ArrayTask::atomic_func()
+template < class T >
+void ArrayTask::_func( T& counter, bool is_mutex, bool with_sleep )
 {
     uint32_t i;
-    bool flag{ true };
-    while( flag ) {
-        i = _index_a.fetch_add( 1 );
-        if( i < _num_tasks ) {
-            ++_array[i];
-        }
-        else {
-            flag = false;
-        }
-    }
-}
+    bool continue_flag{ true };
+    while( continue_flag ) {
+        if( is_mutex ) _m.lock();
+        i = counter++;
+        if( is_mutex ) _m.unlock();
 
-void ArrayTask::atomic_sleeping_func()
-{
-    uint32_t i;
-    bool flag{ true };
-    while( flag ) {
-        i = _index_a.fetch_add( 1 );
         if( i < _num_tasks ) {
             ++_array[i];
-            std::this_thread::sleep_for( std::chrono::nanoseconds(10) );
+            if( with_sleep )
+                std::this_thread::sleep_for( std::chrono::nanoseconds(10) );
         }
-        else {
-            flag = false;
-        }
-    }
-}
-
-void ArrayTask::mutex_func()
-{
-    uint32_t i;
-    bool flag{ true };
-    while( flag ) {
-        _m.lock();
-        i = _index_m;
-        ++_index_m;
-        _m.unlock();
-        if( i < _num_tasks ) {
-            ++_array[i];
-        }
-        else {
-            flag = false;
-        }
-    }
-}
-
-void ArrayTask::mutex_sleeping_func()
-{
-    uint32_t i;
-    bool flag{ true };
-    while( flag ) {
-        _m.lock();
-        i = _index_m;
-        ++_index_m;
-        _m.unlock();
-        if( i < _num_tasks ) {
-            ++_array[i];
-            std::this_thread::sleep_for( std::chrono::nanoseconds(10) );
-        }
-        else {
-            flag = false;
-        }
+        else
+            continue_flag = false;
     }
 }
